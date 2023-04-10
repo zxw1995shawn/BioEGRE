@@ -1,7 +1,4 @@
-# BioBERT for Relation Extraction
-
-To train an RE model with BioBERT-v1.1 (base), please use following command line:
-Before training, please run `./preprocess.sh` to preprocess the datasets downloaded in `biobert-pytorch` (see [here](https://github.com/jhyuklee/biobert-pytorch)).
+# BioEGRE: A Graph Pointer Neural Network based Method for Biomedical Relation Extraction
 
 ## Additional Requirements
 - sklearn: Used for RE evaluation (`pip install scikit-learn`)
@@ -9,49 +6,63 @@ Before training, please run `./preprocess.sh` to preprocess the datasets downloa
 
 ## Training
 ```bash
-export SAVE_DIR=./output
+export SAVE_DIR=/tmp/output
 export DATA="GAD"
 export SPLIT="1"
-export DATA_DIR=../datasets/RE/${DATA}/${SPLIT}
-export ENTITY=${DATA}-${SPLIT}
+export CLASSIFIER_DROPOUT=0.0
+export DATA_DIR=/tmp/zhengxw/${DATA}/${SPLIT}
 
 export MAX_LENGTH=128
-export BATCH_SIZE=32
-export NUM_EPOCHS=3
+export BATCH_SIZE=8
+export NUM_EPOCHS=20
 export SAVE_STEPS=1000
 export SEED=1
+export NUM_CHOSN_NEIGHBORS=32
+export NUM_GPNN_OUTPUT_NODE=4
+export USE_CLS=False
+export NUM_GPNN_LAYERS=0-0
 
-python run_re.py \
-    --task_name SST-2 \
-    --config_name bert-base-cased \
+export ENTITY=${DATA}-${SPLIT}-${MAX_LENGTH}-${BATCH_SIZE}-${NUM_EPOCHS}-${NUM_CHOSN_NEIGHBORS}-${NUM_GPNN_OUTPUT_NODE}-${CLASSIFIER_DROPOUT}-${USE_CLS}-${NUM_GPNN_LAYERS}
+
+export MODEL=BioELECTRA
+
+python bioelectra_linking_CLS_with_entities_with_marked_word_with_multiple_gpnn_layers_for_binary_classification.py \
+    --task_name gad \
+    --config_name ./bioelectra-base-discriminator-pubmed/config.json \
     --data_dir ${DATA_DIR} \
-    --model_name_or_path dmis-lab/biobert-base-cased-v1.1 \
+    --num_chosn_neighbors ${NUM_CHOSN_NEIGHBORS}\
+    --num_GPNN_output_node ${NUM_GPNN_OUTPUT_NODE}\
+    --model_name_or_path ./bioelectra-base-discriminator-pubmed \
     --max_seq_length ${MAX_LENGTH} \
     --num_train_epochs ${NUM_EPOCHS} \
     --per_device_train_batch_size ${BATCH_SIZE} \
     --save_steps ${SAVE_STEPS} \
     --seed ${SEED} \
-    --do_train \
     --do_predict \
     --learning_rate 5e-5 \
-    --output_dir ${SAVE_DIR}/${ENTITY} \
-    --overwrite_output_dir
+    --output_dir ${SAVE_DIR}/${ENTITY}-${MODEL} \
+    --overwrite_output_dir \
+    --classifier_dropout ${CLASSIFIER_DROPOUT} \
+    --logging_dir ./logs/${ENTITY}-${MODEL} \
+    --logging_steps 20\
+    --dataloader_pin_memory True\
+    --dataloader_num_worker 8
 ```
 
 ## Evaluation
 ```bash
-python ./scripts/re_eval.py --output_path=${SAVE_DIR}/${ENTITY}/test_results.txt --answer_path=${DATA_DIR}/test_original.tsv
+python ./scripts/re_eval.py --output_path=${SAVE_DIR}/test_results.txt --answer_path=${DATA_DIR}/test.tsv
 ```
 To evaluate the prediction, please use `scripts/re_eval.py` file. 
 For an example running script for 10-cv experiment, please task a look at `run_re_10cv.sh` and `scripts/re_eval_10cv.sh`.
 
 ## Evaluation Results
-### BioBERT
+### BioEGRE
 
 |                |     Precision (%)    |     Recall (%)    |     F1 (%)    |
 |----------------|:--------------------:|:-----------------:|:-------------:|
-| GAD            |         77.09        |        88.50      |     82.37     |
-| EUADR          |         77.48        |        96.15      |     85.13     |
+| GAD            |         79.21        |        87.11      |     82.98     |
+| EUADR          |         81.14        |        84.98      |     83.00     |
 
 ## Contact
-For help or issues using BioBERT-PyTorch, please create an issue and tag [@wonjininfo](https://github.com/wonjininfo).
+For help or issues, please contact xwzheng60602@163.com .
