@@ -1,8 +1,8 @@
-export SAVE_DIR=/tmp/zhengxw/output
+export SAVE_DIR=/tmp/output
 export DATA="GAD"
 export SPLIT="1"
 export CLASSIFIER_DROPOUT=0.0
-export DATA_DIR=/tmp/zhengxw/${DATA}/${SPLIT}
+export DATA_DIR=/tmp/${DATA}/${SPLIT}
 
 export MAX_LENGTH=128
 export BATCH_SIZE=8
