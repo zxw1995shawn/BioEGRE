@@ -1,9 +1,9 @@
 for SPLIT in 1 2 3 4 5 6 7 8 9 10
 do
-  export SAVE_DIR=/tmp/zhengxw/output
+  export SAVE_DIR=/tmp/output
   export DATA="ADE"
   export CLASSIFIER_DROPOUT=0.0
-  export DATA_DIR=/tmp/zhengxw/${DATA}/${SPLIT}
+  export DATA_DIR=/tmp/${DATA}/${SPLIT}
 
   export MAX_LENGTH=128
   export BATCH_SIZE=16
